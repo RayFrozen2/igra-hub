@@ -1,14 +1,23 @@
 const express = require('express');
 const fetch = require('node-fetch');
-const cors = require('cors');
 const app = express();
 
-app.use(cors());
+// Включаем CORS вручную без сторонних модулей
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+    next();
+});
+
 app.use(express.json());
 
 const GEMINI_API_KEY = process.env.GEMINI_KEY; 
 
-// ОБРАБОТЧИК ДЛЯ САЙТА (принимает запросы на корень сервера)
+// Главный обработчик для сайта
 app.post('/', async (req, res) => {
     try {
         const userPrompt = req.body.prompt;
@@ -39,7 +48,7 @@ app.post('/', async (req, res) => {
     }
 });
 
-// ОБРАБОТЧИК ДЛЯ ROBLOX (оставляем /ask-gemini, чтобы в Roblox Studio ничего не ломалось)
+// Обработчик для Roblox Studio
 app.post('/ask-gemini', async (req, res) => {
     try {
         const userPrompt = req.body.prompt;
@@ -62,5 +71,5 @@ app.post('/ask-gemini', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Сервер запущен`);
+    console.log(`Сервер успешно запущен на порту ${PORT}`);
 });
